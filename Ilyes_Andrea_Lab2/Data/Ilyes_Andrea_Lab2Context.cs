@@ -20,6 +20,7 @@ namespace Ilyes_Andrea_Lab2.Data
             public DbSet<Ilyes_Andrea_Lab2.Models.Customer> Customer { get; set; } = default!;
             public DbSet<Ilyes_Andrea_Lab2.Models.Genre> Genre { get; set; } = default!;
             public DbSet<Ilyes_Andrea_Lab2.Models.Author> Author { get; set; }
+        public DbSet<Ilyes_Andrea_Lab2.Models.Order> Order { get; set; } = default!;
     }
     }
 
