@@ -24,15 +24,23 @@ namespace Ilyes_Andrea_Lab2.Controllers
         {
             ViewData["TitleSortParm"] = String.IsNullOrEmpty(sortOrder) ? "title_desc" : "";
             ViewData["PriceSortParm"] = sortOrder == "Price" ? "price_desc" : "Price";
+            ViewData["AuthorSortParm"] = String.IsNullOrEmpty(sortOrder) ? "FullName_desc" : "";
             ViewData["CurrentFilter"] = searchString;
             var books = from b in _context.Book
                         join a in _context.Author on b.AuthorID equals a.ID
-                        select new BookViewModel
+                        //select new BookViewModel
+                        select new 
                         {
-                            ID = b.ID,
+                            b.ID,
+                            b.Title,
+                            b.Price,
+                            a.FirstName,
+                            a.LastName
+
+                            /*ID = b.ID,
                             Title = b.Title,
                             Price = b.Price,
-                            FullName = a.LastName
+                            FullName = a.FullName*/
                         };
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -49,17 +57,38 @@ namespace Ilyes_Andrea_Lab2.Controllers
                 case "price_desc":
                     books = books.OrderByDescending(b => b.Price);
                     break;
+                case "FullName":
+                    books = books.OrderBy(b => b.FirstName)
+                                 .ThenBy(b => b.LastName);
+                    break;
+
+                case "FullName_desc":
+                    books = books.OrderByDescending(b => b.FirstName)
+                                 .ThenByDescending(b => b.LastName);
+                    break;
+
                 default:
                     books = books.OrderBy(b => b.Title);
                     break;
             }
-            return View(await books.AsNoTracking().ToListAsync());
+
+            var result = books.Select(b => new BookViewModel
             {
+                ID = b.ID,
+                Title = b.Title,
+                Price = b.Price,
+                FullName = b.FirstName + " " + b.LastName
+            });
+
+            return View(await result.AsNoTracking().ToListAsync());
+
+            // return View(await books.AsNoTracking().ToListAsync());
+            /*{
                 var ilyes_Andrea_Lab2Context = _context.Book
                     .Include(b => b.Genre)
                     .Include(b => b.Author);
                 return View(await ilyes_Andrea_Lab2Context.ToListAsync());
-            }
+            }*/
         }
 
         // GET: Books/Details/5
@@ -100,7 +129,7 @@ namespace Ilyes_Andrea_Lab2.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         //public async Task<IActionResult> Create([Bind("ID,Title,Author,Price,GenreID")] Book book)
-        public async Task<IActionResult> Create([Bind("Title,Author,Price")] Book book)
+        public async Task<IActionResult> Create([Bind("Title,AuthorID,Price")] Book book)
         {
             try
             {
